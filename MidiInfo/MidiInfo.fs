@@ -49,7 +49,13 @@ type MainForm () as this =
         gridView.Columns.Add ^ new GridColumn (HeaderText = "Event", DataCell = commandCell)
         gridView.Columns.Add ^ new GridColumn (HeaderText = "Description", DataCell = descriptionCell)
 
-        this.Content <- gridView
+        let infoLabel = new Label ()
+
+        let table = new TableLayout ()
+        table.Rows.Add ^ TableRow (TableCell gridView, ScaleHeight = true)
+        table.Rows.Add ^ TableRow (TableCell infoLabel)
+
+        this.Content <- table
 
         let toolBar = new ToolBar ()
         let item = new ButtonToolItem (fun _ _ ->
@@ -64,6 +70,11 @@ type MainForm () as this =
                 midiFile.Events.[trackIndex]
                 |> Seq.iter rows.Add
                 gridView.DataStore <- rows :> seq<_> :?> seq<obj>
+
+                let infoText = [
+                    System.IO.Path.GetFullPath dialog.FileName
+                    sprintf "Division = %d ticks/(1/4 note)" midiFile.DeltaTicksPerQuarterNote] |> String.concat "\r\n"
+                infoLabel.Text <- infoText
             | _ -> ())
         item.Text <- "Open"
         toolBar.Items.Add ^ item
